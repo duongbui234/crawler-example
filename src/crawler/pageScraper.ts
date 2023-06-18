@@ -1,6 +1,5 @@
 /* eslint-disable prefer-const */
 export const pageScraper = {
-  originUrl: 'https://phongtro123.com/cho-thue-mat-bang',
   setDateTime(string) {
     const dateTimeRegex = /(\d+):(\d+)\s(\d+)\/(\d+)\/(\d+)/; // 09:32 12/12/2022
     const dateRegArr = string.match(dateTimeRegex); // ["09:32 12/12/2022", "09", "32", "12", "12", "2022"]
@@ -12,11 +11,11 @@ export const pageScraper = {
     newDate.setFullYear(dateRegArr[5] * 1);
     return newDate;
   },
-  async scraper(browser) {
+  async scraper(browser, originUrl) {
     let finalData = [];
-    const perPage = 10;
+    const perPage = 1;
     const originPage = await browser.newPage();
-    await originPage.goto(this.originUrl);
+    await originPage.goto(originUrl);
     await originPage.waitForSelector('#main');
     await originPage.click('ul.pagination > li:last-child');
     const numOfPage = await originPage.$eval(
@@ -29,13 +28,13 @@ export const pageScraper = {
     const numOfGroups = Math.ceil(numOfPage / perPage);
     console.log(numOfGroups);
 
-    for (let group = 1; group <= numOfGroups; group++) {
+    for (let group = 1; group <= 2; group++) {
       const startPage = (group - 1) * perPage + 1; // 86-1 * 10 + 1 = 851
       const endPage = Math.min(startPage + perPage - 1, numOfPage); //  852
 
       const groupUrls = new Array(endPage - startPage + 1)
         .fill(0)
-        .map((_, id) => this.originUrl.concat(`?page=${startPage + id}`));
+        .map((_, id) => originUrl.concat(`?page=${startPage + id}`));
 
       console.log(groupUrls);
 
