@@ -1,7 +1,7 @@
-import * as mongoose from 'mongoose';
 import * as dotenv from 'dotenv';
+import mongoose from 'mongoose';
 import * as fs from 'fs';
-import { DepartmentSchema } from '../departments/schemas/department.schema';
+import { DepartmentSchema } from '../models/departments.schema';
 
 dotenv.config({ path: process.cwd() + '/.env' });
 
@@ -24,6 +24,6 @@ dotenv.config({ path: process.cwd() + '/.env' });
   } catch (e) {
     console.error('Import dữ liệu thất bại', e);
   } finally {
-    mongoose.disconnect();
+    await mongoose.disconnect();
   }
 })();
