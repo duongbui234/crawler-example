@@ -1,9 +1,17 @@
-import { Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module, RequestMethod } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { MongooseModule } from '@nestjs/mongoose';
-import { Department, DepartmentSchema } from './models/departments.schema';
 import { ConfigModule } from '@nestjs/config';
+import { Department, DepartmentSchema } from './models/departments.schema';
+import { User, UserSchema } from './models/user.schema';
+import { UserController } from './controller/user.controller';
+import { UserService } from './service/user.service';
+import { PreAuthMiddleware } from './middlewares/preauth.middleware';
+import { JwtModule } from '@nestjs/jwt';
+import { DepartmentController } from './controller/department.controller';
+import { DepartmentService } from './service/department.service';
+import { ProvinceController } from './controller/province.controller';
 
 @Module({
   imports: [
@@ -15,8 +23,36 @@ import { ConfigModule } from '@nestjs/config';
         schema: DepartmentSchema,
       },
     ]),
+    MongooseModule.forFeature([
+      {
+        name: User.name,
+        schema: UserSchema,
+      },
+    ]),
+    JwtModule.register({
+      secret: process.env.JWT_SECRET_KEY,
+      signOptions: { expiresIn: '2h' },
+    }),
   ],
-  controllers: [AppController],
-  providers: [AppService],
+  controllers: [
+    AppController,
+    UserController,
+    DepartmentController,
+    ProvinceController,
+  ],
+  providers: [AppService, UserService, DepartmentService],
 })
-export class AppModule {}
+export class AppModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(PreAuthMiddleware).forRoutes(
+      {
+        path: '/api/v1/user/signup',
+        method: RequestMethod.POST,
+      },
+      {
+        path: '/api/v1/user/reset-password',
+        method: RequestMethod.POST,
+      },
+    );
+  }
+}

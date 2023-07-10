@@ -9,9 +9,9 @@ export async function scrapeAll(browserInstance) {
     browser = await browserInstance;
     let scrapedData = [];
     const urls = [
+      'https://phongtro123.com/cho-thue-mat-bang',
       'https://phongtro123.com/cho-thue-phong-tro',
       'https://phongtro123.com/nha-cho-thue',
-      'https://phongtro123.com/cho-thue-mat-bang',
       'https://phongtro123.com/cho-thue-can-ho',
     ];
 
@@ -27,7 +27,7 @@ export async function scrapeAll(browserInstance) {
       }
 
       fs.writeFile(
-        `data-${i}.json`,
+        `${path}.json`,
         JSON.stringify(scrapedData),
         'utf8',
         function (err) {

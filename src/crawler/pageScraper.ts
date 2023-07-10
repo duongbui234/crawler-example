@@ -13,7 +13,7 @@ export const pageScraper = {
   },
   async scraper(browser, originUrl) {
     let finalData = [];
-    const perPage = 1;
+    const perPage = 10;
     const originPage = await browser.newPage();
     await originPage.goto(originUrl);
     await originPage.waitForSelector('#main');
@@ -28,7 +28,7 @@ export const pageScraper = {
     const numOfGroups = Math.ceil(numOfPage / perPage);
     console.log(numOfGroups);
 
-    for (let group = 1; group <= 2; group++) {
+    for (let group = 1; group <= 10; group++) {
       const startPage = (group - 1) * perPage + 1; // 86-1 * 10 + 1 = 851
       const endPage = Math.min(startPage + perPage - 1, numOfPage); //  852
 
@@ -169,6 +169,18 @@ export const pageScraper = {
                 'section.post-main-content > .section-content',
                 (title) => title.innerHTML,
               );
+            const categoryPromise =
+              dateRegisterEl &&
+              newPage.$eval(
+                'section.post-overview > .section-content > table > tbody > tr:nth-child(3) td:last-child',
+                (text) => text.textContent,
+              );
+            const rentalObjectPromise =
+              dateRegisterEl &&
+              newPage.$eval(
+                'section.post-overview > .section-content > table > tbody > tr:nth-child(4) td:last-child',
+                (text) => text.textContent,
+              );
             const dateRegisterPromise =
               dateRegisterEl &&
               newPage.$eval(
@@ -211,6 +223,8 @@ export const pageScraper = {
               price,
               floorSize,
               description,
+              category,
+              rental_object,
               dateRegister,
               dateExpire,
               username,
@@ -223,6 +237,8 @@ export const pageScraper = {
               pricePromise,
               floorSizePromise,
               descriptionPromise,
+              categoryPromise,
+              rentalObjectPromise,
               dateRegisterPromise,
               dateExpirePromise,
               usernamePromise,
@@ -239,6 +255,9 @@ export const pageScraper = {
             dataObj['price'] = price;
             dataObj['floor_size'] = floorSize;
             dataObj['description'] = description;
+            dataObj['date_register'] = dateRegister;
+            dataObj['rental_object'] = rental_object;
+            dataObj['category'] = category;
             dataObj['date_register'] = dateRegister;
             dataObj['date_expire'] = dateExpire;
             dataObj['username'] = username;
