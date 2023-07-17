@@ -1,13 +1,14 @@
 import { Body, Controller, HttpStatus, Post, Res } from '@nestjs/common';
 import { UserService } from '../service/user.service';
 import { CreateUserDto } from '../dto/create-user.dto';
+import { Response } from 'express';
 
 @Controller('/api/v1/user')
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
   @Post('/signup')
-  async signUp(@Res() res, @Body() user: CreateUserDto) {
+  async signUp(@Res() res, @Body() user: CreateUserDto): Promise<any> {
     const newUser = await this.userService.signUp(user);
     return res.status(HttpStatus.CREATED).json({
       success: true,

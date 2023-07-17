@@ -50,8 +50,10 @@ dotenv.config({ path: process.cwd() + '/.env' });
       }
       return {
         ...department,
+        price: department.price * 1000000,
+        user_id: null,
         slug: slugify(department.title),
-        category,
+        category: category.toLowerCase(),
         province,
         district,
         ward,

@@ -1,5 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { HydratedDocument } from 'mongoose';
+import mongoose, { HydratedDocument } from 'mongoose';
+import { User } from './user.schema';
 
 export type DepartmentDocument = HydratedDocument<Department>;
 
@@ -9,8 +10,13 @@ enum ObjectRental {
   nu = 'Nữ',
 }
 
-@Schema()
+@Schema({ timestamps: true })
 export class Department {
+  @Prop({
+    type: mongoose.Schema.Types.ObjectId,
+    ref: User.name,
+  })
+  user_id: User;
   @Prop()
   title: string;
   @Prop({ unique: true, required: true })
@@ -51,8 +57,8 @@ export class Department {
   images: string[];
   @Prop({ default: 0 })
   deleted: number;
-  @Prop({ default: Date.now() })
-  createdDate: Date;
+  @Prop({ default: 1 })
+  active: number;
 }
 
 export const DepartmentSchema = SchemaFactory.createForClass(Department);

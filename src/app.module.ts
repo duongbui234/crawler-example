@@ -12,6 +12,9 @@ import { JwtModule } from '@nestjs/jwt';
 import { DepartmentController } from './controller/department.controller';
 import { DepartmentService } from './service/department.service';
 import { ProvinceController } from './controller/province.controller';
+import { Transaction, TransactionSchema } from './models/transaction.schema';
+import { PaymentService } from './service/payment.service';
+import { PaymentController } from './controller/payment.controller';
 
 @Module({
   imports: [
@@ -29,6 +32,12 @@ import { ProvinceController } from './controller/province.controller';
         schema: UserSchema,
       },
     ]),
+    MongooseModule.forFeature([
+      {
+        name: Transaction.name,
+        schema: TransactionSchema,
+      },
+    ]),
     JwtModule.register({
       secret: process.env.JWT_SECRET_KEY,
       signOptions: { expiresIn: '2h' },
@@ -39,8 +48,9 @@ import { ProvinceController } from './controller/province.controller';
     UserController,
     DepartmentController,
     ProvinceController,
+    PaymentController,
   ],
-  providers: [AppService, UserService, DepartmentService],
+  providers: [AppService, UserService, DepartmentService, PaymentService],
 })
 export class AppModule {
   configure(consumer: MiddlewareConsumer) {
