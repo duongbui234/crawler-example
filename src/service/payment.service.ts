@@ -14,7 +14,7 @@ export class PaymentService {
   ) {}
 
   async createPaymentUrl(req, body): Promise<any> {
-    const ipAddr = '127.0.0.1';
+    const ipAddr = req.ip;
     console.log(ipAddr);
 
     const tmnCode = process.env.VNP_TMNCODE;
