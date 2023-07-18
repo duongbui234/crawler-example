@@ -2,10 +2,10 @@ import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Department } from '../models/departments.schema';
 import { Model } from 'mongoose';
-import * as dayjs from 'dayjs';
+import dayjs from 'dayjs';
 
-import * as querystring from 'qs';
-import * as crypto from 'crypto';
+import querystring from 'qs';
+import crypto from 'crypto';
 
 @Injectable()
 export class PaymentService {
@@ -22,10 +22,8 @@ export class PaymentService {
     let vnpUrl = process.env.VNP_URL;
     const returnUrl = process.env.VNP_RETURNURL;
 
-    const date = new Date();
-
-    const createDate = dayjs(date).format('yyyymmddHHmmss');
-    const orderId = dayjs(date).format('HHmmss');
+    const createDate = dayjs().format('yyyymmddHHmmss');
+    const orderId = dayjs().format('HHmmss');
     const amount = body.amount;
     const bankCode = body.bankCode;
 
@@ -42,7 +40,7 @@ export class PaymentService {
     vnp_Params['vnp_TmnCode'] = tmnCode;
     // vnp_Params['vnp_Merchant'] = ''
     vnp_Params['vnp_Locale'] = 'vn';
-    vnp_Params['vnp_CurrCode'] = 'VND';
+    vnp_Params['vnp_CurrCode'] = currCode;
     vnp_Params['vnp_TxnRef'] = orderId;
     vnp_Params['vnp_OrderInfo'] = orderInfo;
     vnp_Params['vnp_OrderType'] = orderType;
