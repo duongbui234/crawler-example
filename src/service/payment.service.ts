@@ -3,6 +3,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Department } from '../models/departments.schema';
 import { Model } from 'mongoose';
 import dayjs from 'dayjs';
+import sortObject from 'sortobject';
 
 import querystring from 'qs';
 import crypto from 'crypto';
@@ -27,7 +28,6 @@ export class PaymentService {
     const createDate = dayjs().format('YYYYMMDDHHmmss');
     const orderId = dayjs().format('HHmmss');
     const amount = body.amount;
-    const bankCode = body.bankCode;
     console.log(process.env);
 
     const orderInfo = body.orderDescription;
@@ -37,10 +37,10 @@ export class PaymentService {
       locale = 'vn';
     }
     const currCode = 'VND';
-    const vnp_Params = {};
+    let vnp_Params = {};
     vnp_Params['vnp_Version'] = '2.1.0';
     vnp_Params['vnp_Command'] = 'pay';
-    vnp_Params['vnp_TmnCode'] = tmnCode;
+    vnp_Params['vnp_TmnCode'] = 'FW10MR3G';
     // vnp_Params['vnp_Merchant'] = ''
     vnp_Params['vnp_Locale'] = 'vn';
     vnp_Params['vnp_CurrCode'] = currCode;
@@ -55,19 +55,25 @@ export class PaymentService {
     // if (bankCode !== null && bankCode !== '') {
     // }
 
-    // vnp_Params = sortObject(vnp_Params);
+    vnp_Params = sortObject(vnp_Params);
 
     const signData = querystring.stringify(vnp_Params, { encode: false });
 
-    const hmac = crypto.createHmac('sha512', secretKey);
-    const signed = hmac.update(new Buffer(signData, 'utf-8')).digest('hex');
+    const hmac = crypto.createHmac(
+      'sha512',
+      'BVLUNEJJODMFVMCENZDESSCJKSHMJKLB',
+    );
+    const signed = hmac.update(Buffer.from(signData, 'utf-8')).digest('hex');
     vnp_Params['vnp_SecureHash'] = signed;
 
     vnpUrl += '?' + querystring.stringify(vnp_Params, { encode: false });
+    console.log(vnpUrl);
     return vnpUrl;
   }
 
   async checkPayment(query): Promise<any> {
+    console.log(query);
+
     const vnp_Params = query?.vnp_Params;
 
     const secureHash = vnp_Params['vnp_SecureHash'];
@@ -76,11 +82,11 @@ export class PaymentService {
     delete vnp_Params['vnp_SecureHashType'];
 
     const tmnCode = process.env.VNP_TMNCODE;
-    const secretKey = process.env.VNP_HASHSECRET;
+    const secretKey = 'process.env.VNP_HASHSECRET';
 
     const signData = querystring.stringify(vnp_Params, { encode: false });
     const hmac = crypto.createHmac('sha512', secretKey);
-    const signed = hmac.update(new Buffer(signData, 'utf-8')).digest('hex');
+    const signed = hmac.update(Buffer.from(signData, 'utf-8')).digest('hex');
 
     if (secureHash === signed) {
       return { code: vnp_Params['vnp_ResponseCode'] };
