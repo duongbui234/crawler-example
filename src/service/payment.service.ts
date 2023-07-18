@@ -16,16 +16,19 @@ export class PaymentService {
   async createPaymentUrl(req, body): Promise<any> {
     const ipAddr = req.ip;
     console.log(ipAddr);
+    let returnUrl = '';
 
     const tmnCode = process.env.VNP_TMNCODE;
     const secretKey = process.env.VNP_HASHSECRET;
     let vnpUrl = process.env.VNP_URL;
-    const returnUrl = process.env.VNP_RETURNURL;
 
-    const createDate = dayjs().format('yyyymmddHHmmss');
+    returnUrl = `${process.env.DOMAIN}/api/v1/payment/vnpay-return`;
+
+    const createDate = dayjs().format('YYYYMMDDHHmmss');
     const orderId = dayjs().format('HHmmss');
     const amount = body.amount;
     const bankCode = body.bankCode;
+    console.log(process.env);
 
     const orderInfo = body.orderDescription;
     const orderType = body.orderType;
@@ -59,6 +62,7 @@ export class PaymentService {
     const hmac = crypto.createHmac('sha512', secretKey);
     const signed = hmac.update(new Buffer(signData, 'utf-8')).digest('hex');
     vnp_Params['vnp_SecureHash'] = signed;
+
     vnpUrl += '?' + querystring.stringify(vnp_Params, { encode: false });
     return vnpUrl;
   }
