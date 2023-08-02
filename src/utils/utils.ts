@@ -1,3 +1,4 @@
+/* eslint-disable prefer-const */
 import * as bcrypt from 'bcrypt';
 
 const hashPassword = async (password) => {
@@ -9,12 +10,24 @@ const isMatchPassword = async (enterPassword, hashedPassword) => {
   return await bcrypt.compare(enterPassword, hashedPassword);
 };
 
-// const generateAccessToken = (id) => {
-//   return jwt.sign({ id }, process.env.JWT_SK, { expiresIn: '2h' });
-// };
-//
-// const generateRefreshToken = (id) => {
-//   return jwt.sign({ id }, process.env.JWT_REFRESH);
-// };
+const sortObject = (obj) => {
+  let sorted = {};
+  let str = [];
+  let key;
+  for (key in obj) {
+    if (obj.hasOwnProperty(key)) {
+      str.push(encodeURIComponent(key));
+    }
+  }
+  str.sort();
+  for (key = 0; key < str.length; key++) {
+    sorted[str[key]] = encodeURIComponent(obj[str[key]]).replace(/%20/g, '+');
+  }
+  return sorted;
+};
 
-export { hashPassword, isMatchPassword };
+const isTokenExpired = (token: { exp: number }): boolean => {
+  const currentTime = Math.floor(Date.now() / 1000); // Thời gian hiện tại (Unix Timestamp)
+  return currentTime >= token.exp; // So sánh thời gian hiện tại với thời gian hết hạn (exp) của JWT
+};
+export { hashPassword, isMatchPassword, sortObject, isTokenExpired };

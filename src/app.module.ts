@@ -3,18 +3,21 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { MongooseModule } from '@nestjs/mongoose';
 import { ConfigModule } from '@nestjs/config';
-import { Department, DepartmentSchema } from './models/departments.schema';
 import { User, UserSchema } from './models/user.schema';
 import { UserController } from './controller/user.controller';
 import { UserService } from './service/user.service';
 import { PreAuthMiddleware } from './middlewares/preauth.middleware';
 import { JwtModule } from '@nestjs/jwt';
-import { DepartmentController } from './controller/department.controller';
-import { DepartmentService } from './service/department.service';
+import { PostController } from './controller/post.controller';
+import { PostService } from './service/post.service';
 import { ProvinceController } from './controller/province.controller';
 import { Transaction, TransactionSchema } from './models/transaction.schema';
-import { PaymentService } from './service/payment.service';
-import { PaymentController } from './controller/payment.controller';
+import { Post, PostSchema } from './models/post.schema';
+import { ProtectedMiddleware } from './middlewares/protected.middleware';
+import { TransactionController } from './controller/transaction.controller';
+import { TransactionService } from './service/transaction.service';
+import { Counter, CounterSchema } from './models/counter.schema';
+import { CloudinaryService } from './service/cloudinary.service';
 
 @Module({
   imports: [
@@ -22,10 +25,17 @@ import { PaymentController } from './controller/payment.controller';
     MongooseModule.forRoot(process.env.DATABASE_URL),
     MongooseModule.forFeature([
       {
-        name: Department.name,
-        schema: DepartmentSchema,
+        name: Counter.name,
+        schema: CounterSchema,
       },
     ]),
+    MongooseModule.forFeature([
+      {
+        name: Post.name,
+        schema: PostSchema,
+      },
+    ]),
+
     MongooseModule.forFeature([
       {
         name: User.name,
@@ -46,23 +56,83 @@ import { PaymentController } from './controller/payment.controller';
   controllers: [
     AppController,
     UserController,
-    DepartmentController,
+    PostController,
     ProvinceController,
-    PaymentController,
+    TransactionController,
   ],
-  providers: [AppService, UserService, DepartmentService, PaymentService],
+  providers: [
+    AppService,
+    UserService,
+    PostService,
+    TransactionService,
+    CloudinaryService,
+  ],
 })
 export class AppModule {
   configure(consumer: MiddlewareConsumer) {
-    consumer.apply(PreAuthMiddleware).forRoutes(
-      {
-        path: '/api/v1/user/signup',
-        method: RequestMethod.POST,
-      },
-      {
-        path: '/api/v1/user/reset-password',
-        method: RequestMethod.POST,
-      },
-    );
+    consumer
+      .apply(PreAuthMiddleware)
+      .forRoutes(
+        {
+          path: '/api/v1/user/signup',
+          method: RequestMethod.POST,
+        },
+        {
+          path: '/api/v1/user/reset-password',
+          method: RequestMethod.POST,
+        },
+      )
+      .apply(ProtectedMiddleware)
+      .forRoutes(
+        TransactionController,
+        {
+          path: '/api/v1/user/my-profile',
+          method: RequestMethod.GET,
+        },
+        {
+          path: '/api/v1/user/update-my-profile',
+          method: RequestMethod.PUT,
+        },
+        {
+          path: '/api/v1/post/filter-by-status',
+          method: RequestMethod.POST,
+        },
+        {
+          path: '/api/v1/post',
+          method: RequestMethod.POST,
+        },
+        {
+          path: '/api/v1/post/admin/all',
+          method: RequestMethod.POST,
+        },
+        {
+          path: '/api/v1/post/admin/accept',
+          method: RequestMethod.POST,
+        },
+        {
+          path: '/api/v1/post/:postId',
+          method: RequestMethod.POST,
+        },
+        {
+          path: '/api/v1/post/update-my-post',
+          method: RequestMethod.PUT,
+        },
+        {
+          path: '/api/v1/post/update-hidden-status',
+          method: RequestMethod.PUT,
+        },
+        {
+          path: '/api/v1/post/pay',
+          method: RequestMethod.POST,
+        },
+        {
+          path: '/api/v1/post/my-post',
+          method: RequestMethod.GET,
+        },
+        {
+          path: '/api/v1/post/my-post/:postId',
+          method: RequestMethod.GET,
+        },
+      );
   }
 }

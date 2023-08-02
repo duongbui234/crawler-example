@@ -6,7 +6,6 @@ import {
 } from '@nestjs/common';
 import * as firebaseAdmin from 'firebase-admin';
 
-import * as firebaseServiceAuth from 'src/config/firebaseServiceAuth2.json';
 import { NextFunction, Request, Response } from 'express';
 
 const json = {

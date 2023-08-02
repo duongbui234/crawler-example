@@ -23,7 +23,10 @@ export class GlobalExceptionsFilter implements ExceptionFilter {
 
     const httpException = exception as HttpException;
 
-    console.log(httpException.message);
+    console.log(
+      '🚀 ~ file: global-exceptions.filter.ts:27 ~ GlobalExceptionsFilter ~ httpException:',
+      httpException,
+    );
 
     const responseBody = {
       statusCode: httpStatus,

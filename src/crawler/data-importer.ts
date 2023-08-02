@@ -2,7 +2,8 @@ import * as dotenv from 'dotenv';
 import mongoose from 'mongoose';
 import * as fs from 'fs';
 import slugify from 'slugify';
-import { DepartmentSchema } from '../models/departments.schema';
+import { Post, PostSchema } from '../models/post.schema';
+import { CounterSchema } from '../models/counter.schema';
 
 dotenv.config({ path: process.cwd() + '/.env' });
 
@@ -25,7 +26,7 @@ dotenv.config({ path: process.cwd() + '/.env' });
     }
     console.log(data.length);
 
-    data = data.map((department) => {
+    data = data.map((department, idx) => {
       const diadiem = department.address.split(', ');
       let province;
       let district;
@@ -48,14 +49,21 @@ dotenv.config({ path: process.cwd() + '/.env' });
       } else {
         category = slugify(department.category);
       }
+
+      const imagesTo1 = department.images.map((img) => {
+        return { public_id: '', url: img.replace(/\s/g, '') };
+      });
+
       return {
         ...department,
         price: department.price * 1000000,
         user_id: null,
         slug: slugify(department.title),
         category: category.toLowerCase(),
+        images: [...imagesTo1],
         province,
         district,
+        active: 2,
         ward,
       };
     });
@@ -71,10 +79,17 @@ dotenv.config({ path: process.cwd() + '/.env' });
     };
 
     data = getUniqueObject(data);
+    data = data.map((item, idx) => ({ ...item, postId: idx + 1 }));
 
-    const Department = mongoose.model('Department', DepartmentSchema);
+    const post = mongoose.model('Post', PostSchema);
+    const counter = mongoose.model('Counter', CounterSchema);
 
-    await Department.insertMany(data);
+    await counter.findOneAndUpdate(
+      { collectionName: Post.name },
+      { $inc: { sequence_value: data.length } },
+      { new: true, upsert: true },
+    );
+    await post.insertMany(data);
 
     console.log('Import dữ liệu thành công');
   } catch (e) {
